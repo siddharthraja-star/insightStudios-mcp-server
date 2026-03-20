@@ -73,7 +73,9 @@ The server communicates over stdin/stdout using the MCP JSON-RPC protocol. All l
 python main.py list-tools
 ```
 
-## Connecting to Claude Code
+## Connecting to Claude
+
+### Claude Code (VS Code extension)
 
 Add the server to your Claude Code MCP config (`.claude/settings.json` or `~/.claude/settings.json`):
 
@@ -81,8 +83,42 @@ Add the server to your Claude Code MCP config (`.claude/settings.json` or `~/.cl
 {
   "mcpServers": {
     "insightStudios": {
-      "command": "python",
-      "args": ["/path/to/mcp_servers/main.py"]
+      "command": ".venv/bin/python3",
+      "args": ["main.py"],
+      "type": "stdio"
+    }
+  }
+}
+```
+
+### Claude CLI
+
+The repo already includes a `.mcp.json` at the project root. When you run `claude` from this directory, it is picked up automatically — no extra config needed:
+
+```bash
+cd /path/to/mcp_servers
+claude
+```
+
+To verify the server loaded, run inside the Claude CLI session:
+
+```
+/mcp
+```
+
+You should see `insightStudios` listed as connected with all 5 tools available.
+
+#### Global install (use from any directory)
+
+To make the server available globally, add it to `~/.claude/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "insightStudios": {
+      "command": "/path/to/mcp_servers/.venv/bin/python3",
+      "args": ["/path/to/mcp_servers/main.py"],
+      "type": "stdio"
     }
   }
 }
