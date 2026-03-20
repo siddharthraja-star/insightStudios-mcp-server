@@ -1,0 +1,10 @@
+{
+  "enabledMcpjsonServers": [
+    "insightStudios"
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(.venv/bin/python main.py)"
+    ]
+  }
+}
