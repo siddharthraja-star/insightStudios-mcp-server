@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "insightStudios": {
-      "command": ".venv/bin/python3",
+      "command": "venv/bin/python3",
       "args": ["main.py"],
       "type": "stdio"
     }
