@@ -3,6 +3,21 @@ import time
 from mcp.types import Tool, TextContent
 from .client import get_docker_client
 
+_LOG_FILTER_SCHEMA = {
+    "trace_id": {
+        "type": "string",
+        "description": "Filter log lines to only those containing this trace ID",
+    },
+    "job_id": {
+        "type": "string",
+        "description": "Filter log lines to only those containing this job ID",
+    },
+    "task": {
+        "type": "string",
+        "description": "Filter log lines to only those containing this task type",
+    },
+}
+
 GET_LOGS_TOOL_DEF = Tool(
     name="get_container_logs",
     description="Get stdout/stderr logs from a Docker container",
@@ -22,6 +37,7 @@ GET_LOGS_TOOL_DEF = Tool(
                 "type": "string",
                 "description": "Show logs since timestamp (e.g. '2024-01-01T00:00:00') or relative (e.g. '10m', '1h')",
             },
+            **_LOG_FILTER_SCHEMA,
         },
         "required": ["container_id"],
     },
@@ -47,6 +63,7 @@ STREAM_LOGS_TOOL_DEF = Tool(
                 "description": "Number of existing log lines to include before streaming. Default: 20",
                 "default": 20,
             },
+            **_LOG_FILTER_SCHEMA,
         },
         "required": ["container_id"],
     },
@@ -72,10 +89,24 @@ WAIT_AND_STREAM_TOOL_DEF = Tool(
                 "description": "How many seconds to stream logs once container is found. Default: 30",
                 "default": 30,
             },
+            **_LOG_FILTER_SCHEMA,
         },
         "required": ["name_pattern"],
     },
 )
+
+
+def _apply_filters(text: str, filters: list[str]) -> str:
+    if not filters:
+        return text
+    lines = text.splitlines()
+    for f in filters:
+        lines = [line for line in lines if f in line]
+    return "\n".join(lines)
+
+
+def _extract_filters(arguments: dict) -> list[str]:
+    return [v for k in ("trace_id", "job_id", "task") if (v := arguments.get(k))]
 
 
 def _stream_blocking(container, duration: int, tail: int, log_lines: list):
@@ -102,6 +133,7 @@ async def handle_get_logs(arguments: dict) -> list[TextContent]:
 
     logs = container.logs(**kwargs)
     text = logs.decode("utf-8", errors="replace") if isinstance(logs, bytes) else logs
+    text = _apply_filters(text, _extract_filters(arguments))
     return [TextContent(type="text", text=text or "(no logs)")]
 
 
@@ -121,7 +153,8 @@ async def handle_stream_logs(arguments: dict) -> list[TextContent]:
     except asyncio.TimeoutError:
         pass
 
-    return [TextContent(type="text", text="".join(log_lines) or "(no output)")]
+    text = _apply_filters("".join(log_lines), _extract_filters(arguments))
+    return [TextContent(type="text", text=text or "(no output)")]
 
 
 async def handle_wait_and_stream(arguments: dict) -> list[TextContent]:
@@ -160,4 +193,5 @@ async def handle_wait_and_stream(arguments: dict) -> list[TextContent]:
         timeout=stream_duration + 2,
     )
 
-    return [TextContent(type="text", text="".join(log_lines) or "(no output)")]
+    text = _apply_filters("".join(log_lines), _extract_filters(arguments))
+    return [TextContent(type="text", text=text or "(no output)")]
