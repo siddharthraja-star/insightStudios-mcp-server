@@ -1,4 +1,4 @@
-from . import containers, exec, logs
+from . import containers, exec, logs, rca
 
 ALL_TOOLS = [
     containers.TOOL_DEF,
@@ -6,6 +6,7 @@ ALL_TOOLS = [
     logs.STREAM_LOGS_TOOL_DEF,
     logs.WAIT_AND_STREAM_TOOL_DEF,
     exec.TOOL_DEF,
+    rca.RCA_TOOL_DEF,
 ]
 
 HANDLERS = {
@@ -14,4 +15,5 @@ HANDLERS = {
     "stream_container_logs": logs.handle_stream_logs,
     "wait_and_stream_logs": logs.handle_wait_and_stream,
     "exec_in_container": exec.handle,
+    "analyze_and_write_rca": rca.handle_analyze_and_write_rca,
 }
