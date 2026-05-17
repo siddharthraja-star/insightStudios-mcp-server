@@ -3,6 +3,24 @@ from mcp.types import Tool, TextContent
 
 _DOCS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "docs")
 
+LIST_DOCS_TOOL_DEF = Tool(
+    name="list_rca_docs",
+    description="List all markdown filenames present in the docs/ directory.",
+    inputSchema={"type": "object", "properties": {}},
+)
+
+
+async def handle_list_rca_docs(arguments: dict) -> list[TextContent]:
+    if not os.path.isdir(_DOCS_DIR):
+        return [TextContent(type="text", text="docs/ directory does not exist yet.")]
+
+    files = sorted(f for f in os.listdir(_DOCS_DIR) if f.endswith(".md"))
+    if not files:
+        return [TextContent(type="text", text="No markdown files found in docs/.")]
+
+    lines = [f"**{len(files)} file(s) in docs/**", ""] + [f"- {f}" for f in files]
+    return [TextContent(type="text", text="\n".join(lines))]
+
 EXPORT_DOCS_TOOL_DEF = Tool(
     name="export_rca_docs",
     description=(
