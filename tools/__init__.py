@@ -8,6 +8,7 @@ ALL_TOOLS = [
     exec.TOOL_DEF,
     rca.RCA_TOOL_DEF,
     docs.EXPORT_DOCS_TOOL_DEF,
+    docs.LIST_DOCS_TOOL_DEF,
 ]
 
 HANDLERS = {
@@ -18,4 +19,5 @@ HANDLERS = {
     "exec_in_container": exec.handle,
     "analyze_and_write_rca": rca.handle_analyze_and_write_rca,
     "export_rca_docs": docs.handle_export_rca_docs,
+    "list_rca_docs": docs.handle_list_rca_docs,
 }
