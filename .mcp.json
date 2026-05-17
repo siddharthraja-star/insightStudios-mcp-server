@@ -3,7 +3,10 @@
     "insightStudios": {
       "command": "venv/bin/python3",
       "args": ["main.py"],
-      "type": "stdio"
+      "type": "stdio",
+      "env": {
+        "OPENAI_API_KEY": "your-api-key-here"
+      }
     }
   }
 }
